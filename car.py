@@ -45,11 +45,11 @@ class Car:
         gas = (out[0] + 1) / 2
         self.speed += gas * ACCELERATION
         self.speed = min(self.speed, MAX_SPEED)
-        if out[1] > 0.5:
-            self.speed *= 0.95
 
-        self.angle += out[2] * STEERING_ANGLE
-        self.angle -= out[3] * STEERING_ANGLE
+        brake = (out[2] + 1) / 2
+        self.speed *= (1 - brake * 0.2)
+
+        self.angle += out[1] * STEERING_ANGLE
         self.angle %= 360
 
         self.x += self.speed * math.cos(math.radians(self.angle))
@@ -73,7 +73,7 @@ class Car:
                 self.sensors[i] = 1.0
 
     def _think(self):
-        h = np.maximum(0, np.dot(self.sensors, self.brain['w1']) + self.brain['b1'])
+        h = np.maximum(0, np.dot(self.sensors + [self.speed / MAX_SPEED], self.brain['w1']) + self.brain['b1'])
         return np.tanh(np.dot(h, self.brain['w2']) + self.brain['b2'])
 
     def draw(self, screen, is_best=False):

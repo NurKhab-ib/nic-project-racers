@@ -18,20 +18,33 @@ class Game:
         self.show_stats = True
         self.gen_timer = 0
         self.gen_limit = 20
+        self.points = []
 
-        points = [
+        points1 = [
             (150, 400), (200, 250), (350, 150), (550, 100),
-            (750, 150), (900, 300), (1050, 450), (950, 620),
-            (780, 700), (650, 650), (540, 600), (430, 650),
-            (280, 700), (150, 570), (150, 400),
+            (750, 150), (900, 300), (1000, 450), (950, 620),
+            (780, 700), (650, 650), (540, 600), (430, 675),
+            (280, 690), (150, 570), (150, 400),
         ]
-        self.track = Track(points)
-        self.evolution = Evolution(self.track)
 
-        p0 = points[0]
-        p1 = points[1]
-        self.start_angle = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
-        self.evolution.create_initial_population(p0[0], p0[1], self.start_angle)
+        points2 = [
+            (200, 350), (400, 150), (575, 75), (800, 125), (900, 200), (775, 450),
+            (825, 575), (600, 650), (525, 450), (325, 525), (200, 500),
+            (200, 350)
+        ]
+
+        points3 = [
+            (100, 700), (150, 650), (250, 600), (250, 550), (350, 350), (250, 275), (250, 225), (450, 150),
+            (650, 100), (700, 50), (900, 100), (500, 400), (400, 400),
+            (325, 550), (400, 625), (150, 750), (100, 700)
+        ]
+
+        self.points.append(points1)
+        self.points.append(points2)
+        self.points.append(points3)
+
+        self.current_map = 0
+        self._load_track(self.current_map)
 
     def run(self):
         while self.running:
@@ -42,6 +55,23 @@ class Game:
         pygame.quit()
         sys.exit()
 
+    def _load_track(self, i):
+        self.track = Track(self.points[i])
+        self.evolution = Evolution(self.track)
+
+        p0 = self.points[i][0]
+        p1 = self.points[i][1]
+        self.start_angle = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
+        self.evolution.create_initial_population(p0[0], p0[1], self.start_angle)
+
+        self.gen_timer = 0
+        self.evolution.generation = 0
+        self.evolution.best_fitness = 0
+
+    def _switch_track(self, index):
+        self.current_map = index
+        self._load_track(self.current_map)
+
     def _handle_events(self):
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
@@ -51,6 +81,12 @@ class Game:
                     self.paused = not self.paused
                 elif ev.key == pygame.K_h:
                     self.show_stats = not self.show_stats
+                elif ev.key == pygame.K_1:
+                    self._switch_track(0)
+                elif ev.key == pygame.K_2:
+                    self._switch_track(1)
+                elif ev.key == pygame.K_3:
+                    self._switch_track(2)
 
     def _update(self):
         if self.paused:
@@ -112,6 +148,10 @@ class Game:
             f"Time: {sec}s",
             "",
             "SPACE - Pause | H - Hide",
+            "Switch track:",
+            "1 - First track",
+            "2 - Second track",
+            "3 - Third track",
         ]
         y = 10
         for line in lines:

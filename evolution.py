@@ -9,6 +9,7 @@ class Evolution:
         self.population = []
         self.generation = 0
         self.best_fitness = 0
+        self.same_result = 0
 
     def create_initial_population(self, sx, sy, sa):
         self.population = [Car(sx, sy, sa) for _ in range(POPULATION_SIZE)]
@@ -21,11 +22,21 @@ class Evolution:
             if car.laps_completed > 0:
                 car.fitness += car.laps_completed * 500000 / max(1, car.time_alive)
 
+            if car.speed < 1:
+                car.fitness *= 0.8
+
+            if not car.alive:
+                car.fitness *= 0.7
+
     def selection(self):
         self.population.sort(key=lambda c: c.fitness, reverse=True)
 
         top = self.population[0]
+        self.same_result += 1
+        if top.laps_completed != 0:
+            self.same_result = 0
         if top.fitness > self.best_fitness:
+            self.same_result = 0
             self.best_fitness = top.fitness
             print(f"Gen {self.generation}: fitness={top.fitness:.0f}, "
                   f"laps={top.laps_completed}, cp={top.checkpoints_reached}")
@@ -55,8 +66,12 @@ class Evolution:
 
     def _mutate(self, car):
         for key in car.brain:
-            m = np.random.random(car.brain[key].shape) < MUTATION_RATE
-            car.brain[key] += m * np.random.randn(*car.brain[key].shape) * 0.1
+            if self.same_result > 10:
+                m = np.random.random(car.brain[key].shape) < 0.5
+                car.brain[key] += m * np.random.randn(*car.brain[key].shape) * 0.5
+            else:
+                m = np.random.random(car.brain[key].shape) < MUTATION_RATE
+                car.brain[key] += m * np.random.randn(*car.brain[key].shape) * 0.2
 
     def reset_population(self, sx, sy, sa):
         for car in self.population:
