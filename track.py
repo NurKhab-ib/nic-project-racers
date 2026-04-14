@@ -25,6 +25,8 @@ class Track:
         for i in range(len(self.path_points) - 1):
             x1, y1 = self.path_points[i]
             x2, y2 = self.path_points[i + 1]
+
+            # split the center line into several small progress markers
             n = max(1, int(math.hypot(x2 - x1, y2 - y1) / 40))
             for j in range(n):
                 if i == 0 and j == 0:
@@ -40,6 +42,7 @@ class Track:
         return self.mask.get_at((ix, iy))
 
     def check_checkpoint(self, car):
+        # checkpoints handling
         if car.checkpoints_reached >= len(self.checkpoints):
             car.laps_completed += 1
             car.checkpoints_reached = 0

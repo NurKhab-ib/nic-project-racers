@@ -18,6 +18,8 @@ class Evolution:
         n_cp = len(self.track.checkpoints)
         for car in self.population:
             progress = car.laps_completed * n_cp + car.checkpoints_reached
+
+            # the number of laps is more important than just progressing to checkpoints
             car.fitness = progress * 100
             if car.laps_completed > 0:
                 car.fitness += car.laps_completed * 500000 / max(1, car.time_alive)
@@ -41,7 +43,9 @@ class Evolution:
             print(f"Gen {self.generation}: fitness={top.fitness:.0f}, "
                   f"laps={top.laps_completed}, cp={top.checkpoints_reached}")
 
+        # keeps the best cars and fills the rest with children
         new_pop = [c.copy() for c in self.population[:ELITE_SIZE]]
+
         while len(new_pop) < POPULATION_SIZE:
             p1 = self._tournament()
             p2 = self._tournament()
@@ -67,6 +71,7 @@ class Evolution:
     def _mutate(self, car):
         for key in car.brain:
             if self.same_result > 10:
+                # use stronger mutation when learning is stuck
                 m = np.random.random(car.brain[key].shape) < 0.5
                 car.brain[key] += m * np.random.randn(*car.brain[key].shape) * 0.5
             else:

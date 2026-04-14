@@ -20,6 +20,7 @@ class Game:
         self.gen_limit = 20
         self.points = []
 
+        # 3 predefined track layouts
         points1 = [
             (150, 400), (200, 250), (350, 150), (550, 100),
             (750, 150), (900, 300), (1000, 450), (950, 620),
@@ -61,6 +62,8 @@ class Game:
 
         p0 = self.points[i][0]
         p1 = self.points[i][1]
+
+        # start direction is from the 1st track segment
         self.start_angle = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
         self.evolution.create_initial_population(p0[0], p0[1], self.start_angle)
 
@@ -99,6 +102,7 @@ class Game:
                 car.update(self.track)
                 all_dead = False
 
+        # start new generation if all cars are dead or time limit is reached
         if all_dead or self.gen_timer >= self.gen_limit:
             self.evolution.evaluate_fitness()
             self.evolution.selection()
@@ -111,8 +115,11 @@ class Game:
         self.track.draw(self.screen)
 
         alive = [c for c in self.evolution.population if c.alive]
+
+        # leader is the car with the best current race progress
         leader = max(alive, key=lambda c: (c.laps_completed, c.checkpoints_reached),
                      default=None)
+
         for car in self.evolution.population:
             car.draw(self.screen, is_best=(car is leader))
 

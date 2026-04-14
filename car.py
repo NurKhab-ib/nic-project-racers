@@ -42,6 +42,7 @@ class Car:
         self._read_sensors(track)
         out = self._think()
 
+        # the network outputs control gas, steering, and brakes
         gas = (out[0] + 1) / 2
         self.speed += gas * ACCELERATION
         self.speed = min(self.speed, MAX_SPEED)
@@ -65,6 +66,7 @@ class Car:
             rad = math.radians(self.angle + offset)
             cos_r, sin_r = math.cos(rad), math.sin(rad)
 
+            # cast each ray until it leaves the track
             for d in range(10, SENSOR_MAX_DISTANCE, 5):
                 if not track.is_on_track(self.x + d * cos_r, self.y + d * sin_r):
                     self.sensors[i] = d / SENSOR_MAX_DISTANCE
